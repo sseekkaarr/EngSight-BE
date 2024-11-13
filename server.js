@@ -20,7 +20,9 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes); // Authentication routes
 app.use('/api/videos', videoProgressRoutes); // Video progress routes
-app.use("/api/test", testRoutes);
+// app.use("/api/test", testRoutes);
+app.use("/api", testRoutes);
+
 
 
 // Sync database

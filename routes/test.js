@@ -1,9 +1,13 @@
 const express = require("express");
-const { evaluateTest } = require("../controllers/testEvaluationController");
+const { evaluateTest, getTestResults } = require("../controllers/testEvaluationController");
 const router = express.Router();
 
-// Route untuk POST evaluate-test
-router.post('/evaluate-test', evaluateTest);
+
+// Endpoint evaluasi tes
+router.post("/evaluate-test", evaluateTest);
+
+// Endpoint untuk mendapatkan hasil tes
+router.get("/test-results/:user_id", getTestResults);
 
 
 router.get("/results/:user_id", async (req, res) => {
