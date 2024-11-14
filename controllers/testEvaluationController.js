@@ -232,6 +232,7 @@ const getLastTestResults = async (req, res) => {
     try {
         const { user_id } = req.params;
 
+        // Ambil hasil tes berdasarkan user_id dan test_type
         const preReadingLab = await TestResult.findOne({
             where: { user_id, test_type: "pre_reading_lab" },
             order: [["submission_date", "DESC"]],
@@ -247,14 +248,18 @@ const getLastTestResults = async (req, res) => {
             order: [["submission_date", "DESC"]],
         });
 
-        console.log({ preReadingLab, readingLab, postReadingLab }); // Tambahkan ini untuk debugging
-
-        res.status(200).json({ preReadingLab, readingLab, postReadingLab });
+        // Jika hasil tes tidak ditemukan, set nilai default
+        res.status(200).json({
+            preReadingLab: preReadingLab || { score: 0, max_score: 100, test_type: "pre_reading_lab" },
+            readingLab: readingLab || { score: 0, max_score: 100, test_type: "reading_lab" },
+            postReadingLab: postReadingLab || { score: 0, max_score: 100, test_type: "post_reading_lab" },
+        });
     } catch (error) {
         console.error("Error fetching test results:", error);
         res.status(500).json({ error: "Failed to fetch test results" });
     }
 };
+
 
 
 
