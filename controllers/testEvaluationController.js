@@ -151,6 +151,83 @@ const evaluateTest = async (req, res) => {
     }
 };
 
+const evaluateEssay = (essay) => {
+    let score = 0;
+
+    // 1. Keyword Matching
+    const keywords = {
+        high: ["Sentiment API", "emotional surveillance", "privacy", "autonomy", "data collection", "consumer trust"],
+        medium: ["wearable devices", "Halo", "woke capitalism", "AI-powered analysis", "mental health monitoring", "tech companies"],
+        low: ["regulation", "health trends", "user consent", "Big Data", "advertising strategies"],
+    };
+    const keywordPoints = { high: 5, medium: 3, low: 1 };
+    Object.keys(keywords).forEach((level) => {
+        keywords[level].forEach((keyword) => {
+            const count = (essay.match(new RegExp(keyword, "gi")) || []).length;
+            score += count * keywordPoints[level];
+        });
+    });
+
+    // 2. Struktur Esai
+    const structure = {
+        intro: essay.includes("This article discusses") || essay.includes("The main focus is"),
+        body: essay.includes("Furthermore") || essay.includes("For instance"),
+        conclusion: essay.includes("In conclusion") || essay.includes("Finally"),
+    };
+    score += structure.intro ? 10 : 0;
+    score += structure.body ? 10 : 0;
+    score += structure.conclusion ? 10 : 0;
+
+    // 3. Panjang Esai
+    const wordCount = essay.split(/\s+/).length;
+    if (wordCount >= 325 && wordCount <= 475) {
+        score += 20;
+    } else if (wordCount >= 300 && wordCount <= 500) {
+        score += 10;
+    }
+
+    // 4. Kualitas Bahasa (dummy logic)
+    const grammarScore = 10; // Full points for grammar for now
+    score += grammarScore;
+
+    return score;
+};
+
+const evaluatePostReadingLab = async (req, res) => {
+    try {
+        const { essay, user_id } = req.body;
+
+        if (!essay || !user_id) {
+            return res.status(400).json({ error: "Essay and User ID are required." });
+        }
+
+        const score = evaluateEssay(essay);
+
+        console.log(`Calculated Score: ${score}`); // Debugging
+
+        const result = await TestResult.create({
+            user_id: user_id,
+            test_type: "post_reading_lab",
+            score: score,
+            max_score: 100,
+            submission_date: new Date(),
+        });
+
+        console.log("Post Reading Lab Saved:", result); // Debugging
+
+        res.status(200).json({
+            message: "Post Reading Lab evaluated successfully",
+            score,
+            max_score: 100,
+            result,
+        });
+    } catch (error) {
+        console.error("Error evaluating post reading lab:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+};
+
+
 const getLastTestResults = async (req, res) => {
     try {
         const { user_id } = req.params;
@@ -165,11 +242,21 @@ const getLastTestResults = async (req, res) => {
             order: [["submission_date", "DESC"]],
         });
 
-        res.status(200).json({ preReadingLab, readingLab });
+        const postReadingLab = await TestResult.findOne({
+            where: { user_id, test_type: "post_reading_lab" },
+            order: [["submission_date", "DESC"]],
+        });
+
+        console.log({ preReadingLab, readingLab, postReadingLab }); // Tambahkan ini untuk debugging
+
+        res.status(200).json({ preReadingLab, readingLab, postReadingLab });
     } catch (error) {
         console.error("Error fetching test results:", error);
         res.status(500).json({ error: "Failed to fetch test results" });
     }
 };
 
-module.exports = { completePreReadingLab, evaluateTest, getLastTestResults };
+
+
+
+module.exports = { completePreReadingLab, evaluateTest, evaluatePostReadingLab, getLastTestResults };

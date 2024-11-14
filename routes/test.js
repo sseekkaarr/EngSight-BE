@@ -1,9 +1,11 @@
 const express = require("express");
-const { completePreReadingLab, evaluateTest, getLastTestResults } = require("../controllers/testEvaluationController");
+const { completePreReadingLab, evaluateTest, getLastTestResults, evaluatePostReadingLab } = require("../controllers/testEvaluationController");
 const router = express.Router();
 const TestResult = require("../models/TestResult");
 
 router.post("/complete-pre-reading-lab", completePreReadingLab);
+
+router.post("/evaluatePostReadingLab", evaluatePostReadingLab);
 
 
 // Endpoint evaluasi tes
