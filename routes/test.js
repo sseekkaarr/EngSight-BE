@@ -1,13 +1,16 @@
 const express = require("express");
-const { evaluateTest, getTestResults } = require("../controllers/testEvaluationController");
+const { completePreReadingLab, evaluateTest, getLastTestResults } = require("../controllers/testEvaluationController");
 const router = express.Router();
 const TestResult = require("../models/TestResult");
+
+router.post("/complete-pre-reading-lab", completePreReadingLab);
+
 
 // Endpoint evaluasi tes
 router.post("/evaluate-test", evaluateTest);
 
 // Endpoint untuk mendapatkan semua hasil tes user
-router.get("/test-results/:user_id", getTestResults);
+router.get("/test-results/:user_id", getLastTestResults);
 
 // Endpoint untuk mendapatkan hasil tes terbaru (terakhir submit)
 router.get("/test-results/:userId", async (req, res) => {

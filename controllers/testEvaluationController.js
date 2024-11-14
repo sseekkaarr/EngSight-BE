@@ -1,6 +1,30 @@
 const fuzz = require("fuzzball");
 const TestResult = require("../models/TestResult");
 
+const completePreReadingLab = (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
+
+    TestResult.create({
+        user_id,
+        test_type: "pre_reading_lab",
+        score: 100,
+        max_score: 100,
+        submission_date: new Date(),
+    })
+        .then((result) => {
+            res.status(201).json(result);
+        })
+        .catch((error) => {
+            console.error("Error completing Pre-Reading Lab:", error);
+            res.status(500).json({ message: "Failed to complete Pre-Reading Lab" });
+        });
+};
+
+
 // Kunci jawaban
 const CORRECT_ANSWERS = {
     text_box: {
@@ -127,23 +151,25 @@ const evaluateTest = async (req, res) => {
     }
 };
 
-const getTestResults = async (req, res) => {
+const getLastTestResults = async (req, res) => {
     try {
         const { user_id } = req.params;
-        const latestResult = await TestResult.findOne({
-            where: { user_id },
+
+        const preReadingLab = await TestResult.findOne({
+            where: { user_id, test_type: "pre_reading_lab" },
             order: [["submission_date", "DESC"]],
         });
 
-        if (!latestResult) {
-            return res.status(404).json({ message: "No test results found" });
-        }
+        const readingLab = await TestResult.findOne({
+            where: { user_id, test_type: "reading_lab" },
+            order: [["submission_date", "DESC"]],
+        });
 
-        res.status(200).json(latestResult);
-    } catch (err) {
-        console.error("Error fetching test results:", err);
-        res.status(500).json({ message: "Failed to fetch test results" });
+        res.status(200).json({ preReadingLab, readingLab });
+    } catch (error) {
+        console.error("Error fetching test results:", error);
+        res.status(500).json({ error: "Failed to fetch test results" });
     }
 };
 
-module.exports = { evaluateTest, getTestResults };
+module.exports = { completePreReadingLab, evaluateTest, getLastTestResults };
