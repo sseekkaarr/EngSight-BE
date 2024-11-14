@@ -42,21 +42,23 @@ router.get('/progress/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const progress = await VideoProgress.findAll({
-            attributes: [
-                'sectionName',
-                [sequelize.fn('COUNT', sequelize.col('videoId')), 'totalVideos'],
-                [sequelize.fn('SUM', sequelize.col('watched')), 'watchedVideos'],
-                [
-                    sequelize.literal(
-                        '(SUM(watched) / COUNT(videoId)) * 100'
-                    ),
-                    'progress',
-                ],
-            ],
-            where: { userId },
-            group: ['sectionName'],
-        });
+        const progress = await sequelize.query(
+            `
+            SELECT 
+                v.sectionName,
+                COUNT(v.id) AS totalVideos,
+                COUNT(vp.videoId) AS watchedVideos,
+                ROUND((COUNT(vp.videoId) / COUNT(v.id)) * 100, 0) AS progress
+            FROM videos v
+            LEFT JOIN video_progress vp 
+                ON v.id = vp.videoId AND vp.userId = :userId
+            GROUP BY v.sectionName
+            `,
+            {
+                replacements: { userId },
+                type: sequelize.QueryTypes.SELECT,
+            }
+        );
 
         res.status(200).json({ progress });
     } catch (error) {
@@ -64,5 +66,6 @@ router.get('/progress/:userId', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 module.exports = router;

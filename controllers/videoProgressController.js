@@ -1,4 +1,32 @@
-const VideoProgress = require('../models/VideoProgress');
+const sequelize = require("../config/database");
+const VideoProgress = require("../models/VideoProgress");
+
+exports.trackVideoProgress = async (req, res) => {
+    const { userId, videoId, sectionName } = req.body;
+
+    try {
+        const existingRecord = await VideoProgress.findOne({
+            where: { userId, videoId },
+        });
+
+        if (existingRecord) {
+            return res.status(200).json({ message: 'Video already tracked' });
+        }
+
+        await VideoProgress.create({
+            userId,
+            videoId,
+            sectionName,
+            watched: true,
+        });
+
+        res.status(201).json({ message: 'Progress tracked successfully' });
+    } catch (error) {
+        console.error('Error tracking video progress:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 
 // Simpan progress video
 exports.saveVideoProgress = async (req, res) => {
@@ -33,22 +61,37 @@ exports.saveVideoProgress = async (req, res) => {
 
 
 // Ambil progress video
+
+
+// Ambil progress video
 exports.getVideoProgress = async (req, res) => {
+    const { userId } = req.params;
+
     try {
-        const { userId } = req.query;
+        // Query dengan join ke tabel master video untuk menghitung total video per section
+        const progress = await sequelize.query(
+            `
+            SELECT
+                v.sectionName,
+                COUNT(v.id) AS totalVideos,
+                COUNT(vp.id) AS watchedVideos,
+                (COUNT(vp.id) / COUNT(v.id)) * 100 AS progress
+            FROM videos v
+            LEFT JOIN video_progress vp
+                ON v.id = vp.videoId AND vp.userId = :userId
+            GROUP BY v.sectionName
+            `,
+            {
+                type: sequelize.QueryTypes.SELECT,
+                replacements: { userId },
+            }
+        );
 
-        console.log("Fetching progress for user_id:", userId); // Debug query parameter
-
-        const progress = await VideoProgress.findAll({
-            where: { userId },
-            attributes: ['videoId', 'sectionName', 'watched'],
-        });
-
-        console.log("Query result:", progress); // Debug hasil query ke database
-        res.status(200).json(progress);
+        res.status(200).json({ progress });
     } catch (error) {
         console.error("Error fetching video progress:", error);
         res.status(500).json({ message: "Error fetching video progress", error });
     }
 };
+
 
