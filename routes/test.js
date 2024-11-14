@@ -13,18 +13,14 @@ router.get("/test-results/:user_id", getTestResults);
 router.get("/test-results/:userId", async (req, res) => {
     try {
         const { userId } = req.params;
-
-        // Query untuk mengambil data hasil tes
-        const results = await TestResult.findAll({
+        const result = await TestResult.findOne({
             where: { user_id: userId },
-            order: [["submission_date", "DESC"]], // Urutkan berdasarkan tanggal terbaru
+            order: [["submission_date", "DESC"]],
         });
-
-        if (!results.length) {
+        if (!result) {
             return res.status(404).json({ message: "No test results found" });
         }
-
-        res.status(200).json(results);
+        res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching test results:", error);
         res.status(500).json({ message: "Internal server error" });

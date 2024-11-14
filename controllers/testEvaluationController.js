@@ -130,25 +130,20 @@ const evaluateTest = async (req, res) => {
 const getTestResults = async (req, res) => {
     try {
         const { user_id } = req.params;
-
-        console.log(`Fetching test results for user_id: ${user_id}`); // Log tambahan
-        const results = await TestResult.findAll({
+        const latestResult = await TestResult.findOne({
             where: { user_id },
+            order: [["submission_date", "DESC"]],
         });
 
-        if (!results || results.length === 0) {
-            console.log("No results found."); // Log tambahan
+        if (!latestResult) {
             return res.status(404).json({ message: "No test results found" });
         }
 
-        console.log("Results fetched:", results); // Log hasil
-        return res.status(200).json(results);
+        res.status(200).json(latestResult);
     } catch (err) {
-        console.error("Error Fetching Results:", err);
-        return res.status(500).json({ error: "Internal server error" });
+        console.error("Error fetching test results:", err);
+        res.status(500).json({ message: "Failed to fetch test results" });
     }
 };
 
-
-
-module.exports = { getTestResults, evaluateTest };
+module.exports = { evaluateTest, getTestResults };
