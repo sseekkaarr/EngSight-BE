@@ -71,17 +71,22 @@ router.get('/profile', authMiddleware, async (req, res) => {
         const userId = req.user.userId;
 
         const user = await User.findByPk(userId, {
-            attributes: ['name', 'email'],
+            attributes: ['id', 'name', 'email'], // Tambahkan 'id' ke atribut
         });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json(user);
+        res.status(200).json({
+            user_id: user.id, // Tambahkan user_id ke respons
+            name: user.name,
+            email: user.email,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+
 module.exports = router;
