@@ -12,7 +12,7 @@ const app = express();
 // Middleware
 
 app.use(cors({
-    origin: 'https://eng-sight-gm72ka3lx-skars-projects-f0e86958.vercel.app', // Domain frontend
+    origin: 'eng-sight-web.vercel.app', // Domain frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
