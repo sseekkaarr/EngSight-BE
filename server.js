@@ -10,14 +10,13 @@ const testRoutes = require('./routes/test');
 const app = express();
 
 // Middleware
+
 app.use(cors({
-    origin: [
-        'https://eng-sight-web.vercel.app', // Frontend Vercel URL
-        'http://localhost:3000', // Optional: Local development
-    ],
+    origin: 'https://eng-sight-gm72ka3lx-skars-projects-f0e86958.vercel.app', // Domain frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, // Allow credentials if needed (e.g., cookies)
+    credentials: true,
 }));
+
 
 app.use(bodyParser.json());
 app.use(express.json());
