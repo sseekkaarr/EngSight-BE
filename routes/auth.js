@@ -59,13 +59,14 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Log hash password dari database
+        // Log password hash dari database
         console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
         // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
         console.log(`Password match result: ${isMatch}`);
         if (!isMatch) {
+            console.log(`Password mismatch for email: ${email}`);
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
