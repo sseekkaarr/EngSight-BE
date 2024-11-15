@@ -3,7 +3,20 @@ const { completePreReadingLab, evaluateTest, getLastTestResults, evaluatePostRea
 const router = express.Router();
 const TestResult = require("../models/TestResult");
 
-router.post("/complete-pre-reading-lab", completePreReadingLab);
+router.post('/complete-pre-reading-lab', authMiddleware, async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        if (!user_id) {
+            return res.status(400).json({ message: 'User ID is required.' });
+        }
+        console.log(`Pre-Reading Lab completed by User ID: ${user_id}`);
+        res.status(200).json({ message: 'Pre-Reading Lab completed successfully.' });
+    } catch (error) {
+        console.error('Error completing Pre-Reading Lab:', error.message);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
 
 router.post("/evaluatePostReadingLab", evaluatePostReadingLab);
 
