@@ -1,17 +1,21 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-        return res.status(401).json({ message: 'No token, authorization denied' });
-    }
-
+const authMiddleware = (req, res, next) => {
     try {
+        // Ambil token dari header Authorization
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided.' });
+        }
+
+        // Verifikasi token dan decode payload
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { userId: decoded.userId }; // Pastikan userId diatur dengan benar
-        next();
+        req.user = decoded; // Simpan payload dari token ke req.user
+        next(); // Lanjutkan ke route berikutnya
     } catch (err) {
-        res.status(401).json({ message: 'Token is not valid' });
+        console.error('Auth middleware error:', err.message);
+        return res.status(401).json({ message: 'Invalid token.' });
     }
 };
+
+module.exports = authMiddleware;

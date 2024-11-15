@@ -8,6 +8,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Rute untuk registrasi pengguna baru
+// Rute untuk registrasi pengguna baru
 router.post('/register', async (req, res) => {
     try {
         const { email, password, name } = req.body;
@@ -23,19 +24,25 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Email already registered.' });
         }
 
+        // Enkripsi password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Buat pengguna baru
         const user = await User.create({
             email,
-            password,
-            name: name.trim() || 'User', // Set default name to 'User' if empty
+            password: hashedPassword, // Simpan password yang telah dienkripsi
+            name: name.trim() || 'User', // Default name jika kosong
         });
 
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (err) {
+        console.error('Error registering user:', err.message);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 
+
+// Rute untuk login pengguna
 // Rute untuk login pengguna
 router.post('/login', async (req, res) => {
     try {
@@ -61,9 +68,11 @@ router.post('/login', async (req, res) => {
             },
         });
     } catch (err) {
+        console.error('Error during login:', err.message);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
 
 // Rute untuk mendapatkan informasi profil pengguna
 router.get('/profile', authMiddleware, async (req, res) => {
