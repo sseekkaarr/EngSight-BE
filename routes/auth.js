@@ -45,18 +45,29 @@ module.exports = router;
 
 
 // Rute untuk login pengguna
-// Rute untuk login pengguna
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Log input email dan password
+        console.log(`Login attempt: Email: ${email}, Password: ${password}`);
+
         // Cari pengguna berdasarkan email
         const user = await User.findOne({ where: { email } });
-        if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+        if (!user) {
+            console.log(`User not found for email: ${email}`);
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
+
+        // Log hash password dari database
+        console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
         // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
+        console.log(`Password match result: ${isMatch}`);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
 
         // Buat token JWT
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -74,6 +85,8 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
+
 
 
 // Rute untuk mendapatkan informasi profil pengguna
