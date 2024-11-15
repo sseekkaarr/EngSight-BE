@@ -4,9 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
-
 const authMiddleware = require('../middleware/authMiddleware');
-
 
 // Rute untuk registrasi pengguna baru
 router.post('/register', async (req, res) => {
@@ -30,6 +28,7 @@ router.post('/register', async (req, res) => {
 
         // Enkripsi password
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(`Password hashed during registration: ${hashedPassword}`); // Tambahkan log
 
         // Buat pengguna baru
         const user = await User.create({ email, password: hashedPassword, name });
@@ -39,7 +38,6 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
 
 // Rute untuk login pengguna
 router.post('/login', async (req, res) => {
@@ -57,7 +55,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Log hash password dari database
-        console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
+        console.log(`Found user: ${user.email}, Hashed Password in DB: ${user.password}`);
 
         // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
@@ -80,35 +78,6 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         console.error('Error during login:', err.message);
         res.status(500).json({ message: 'Server error', error: err.message });
-    }
-});
-
-
-
-
-
-
-// Rute untuk mendapatkan informasi profil pengguna
-router.get('/profile', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.userId;
-
-        const user = await User.findByPk(userId, {
-            attributes: ['id', 'name', 'email'], // Tambahkan 'id' ke atribut
-        });
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.status(200).json({
-            user_id: user.id, // Tambahkan user_id ke respons
-            name: user.name,
-            email: user.email,
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 
