@@ -48,6 +48,7 @@ router.post('/login', async (req, res) => {
 
         console.log(`Login attempt: Email: ${email}, Password: ${password}`);
 
+        // Cari pengguna berdasarkan email
         const user = await User.findOne({ where: { email } });
         if (!user) {
             console.log(`User not found for email: ${email}`);
@@ -56,6 +57,7 @@ router.post('/login', async (req, res) => {
 
         console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
+        // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
         console.log(`Password match result: ${isMatch}`);
         if (!isMatch) {
@@ -78,6 +80,7 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
 
 
 
