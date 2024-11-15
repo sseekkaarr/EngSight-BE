@@ -4,27 +4,36 @@ const sequelize = require('./config/database');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const videoProgressRoutes = require('./routes/videoProgress'); // Import video progress routes
+const videoProgressRoutes = require('./routes/videoProgress');
 const testRoutes = require('./routes/test');
 
 const app = express();
 
-// Middleware
+// Middleware untuk menangani CORS secara fleksibel
+const corsOptions = {
+  origin: [
+      'https://eng-sight-web.vercel.app', 
+      'http://localhost:3000'
+  ], // Daftar semua domain yang diizinkan
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // Untuk mendukung cookie/sesi
+};
+app.use(cors(corsOptions));
 
-app.use(cors({
-    origin: 'eng-sight-web.vercel.app', // Domain frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-}));
+app.use((req, res, next) => {
+  console.log(`Request received from origin: ${req.headers.origin}`);
+  next();
+});
 
 
+// Middleware lainnya
 app.use(bodyParser.json());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes); // Authentication routes
-app.use('/api/videos', videoProgressRoutes); // Video progress routes
-app.use('/api', testRoutes); // Other routes
+app.use('/api/auth', authRoutes);
+app.use('/api/videos', videoProgressRoutes);
+app.use('/api', testRoutes);
 
 // Sync database
 sequelize

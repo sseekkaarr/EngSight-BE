@@ -7,7 +7,7 @@ const router = express.Router();
 
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Rute untuk registrasi pengguna baru
+
 // Rute untuk registrasi pengguna baru
 router.post('/register', async (req, res) => {
     try {
@@ -16,6 +16,10 @@ router.post('/register', async (req, res) => {
         // Validasi input
         if (!email || !password || !name) {
             return res.status(400).json({ message: 'Name, email, and password are required.' });
+        }
+
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid email format.' });
         }
 
         // Periksa jika email sudah terdaftar
@@ -28,18 +32,16 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Buat pengguna baru
-        const user = await User.create({
-            email,
-            password: hashedPassword, // Simpan password yang telah dienkripsi
-            name: name.trim() || 'User', // Default name jika kosong
-        });
-
-        res.status(201).json({ message: 'User registered successfully!' });
-    } catch (err) {
-        console.error('Error registering user:', err.message);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        const user = await User.create({ email, password: hashedPassword, name });
+        return res.status(201).json({ message: 'User registered successfully.', user });
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
+
+module.exports = router;
+
 
 
 // Rute untuk login pengguna
