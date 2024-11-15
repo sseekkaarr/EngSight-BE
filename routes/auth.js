@@ -84,6 +84,46 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        console.log(`Login attempt: Email: ${email}, Password: ${password}`);
+
+        // Cari pengguna berdasarkan email
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            console.log(`User not found for email: ${email}`);
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
+
+        console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
+
+        // Periksa password
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log(`Password match result: ${isMatch}`);
+        if (!isMatch) {
+            console.log(`Password mismatch for email: ${email}`);
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
+
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(200).json({
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            },
+        });
+    } catch (err) {
+        console.error('Error during login:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+
 
 
 
