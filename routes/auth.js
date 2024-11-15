@@ -46,6 +46,7 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Log input email dan password
         console.log(`Login attempt: Email: ${email}, Password: ${password}`);
 
         // Cari pengguna berdasarkan email
@@ -55,6 +56,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
+        // Log hash password dari database
         console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
         // Periksa password
@@ -65,6 +67,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
+        // Buat token JWT
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.status(200).json({
@@ -80,6 +83,7 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
 
 
 
