@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Log email dan password input
+        // Log input email dan password
         console.log(`Login attempt: Email: ${email}, Password: ${password}`);
 
         // Cari pengguna berdasarkan email
@@ -57,20 +57,17 @@ router.post('/login', async (req, res) => {
         }
 
         // Log hash password dari database
-        console.log(`Found user: ${user.email}, Hashed Password in DB: ${user.password}`);
+        console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
         // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log(`Password match result for ${email}: ${isMatch}`);
-        
+        console.log(`Password match result: ${isMatch}`);
         if (!isMatch) {
-            console.log(`Password mismatch for email: ${email}`);
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Jika password cocok, buat token JWT
+        // Buat token JWT
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        console.log(`Login successful for email: ${email}`);
 
         res.status(200).json({
             token,
