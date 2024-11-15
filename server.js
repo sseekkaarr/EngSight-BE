@@ -10,7 +10,15 @@ const testRoutes = require('./routes/test');
 const app = express();
 
 // Middleware
-app.use(cors({ origin: 'https://eng-sight-web.vercel.app' })); // Restrict CORS to your frontend domain
+app.use(cors({
+    origin: [
+        'https://eng-sight-web.vercel.app', // Frontend Vercel URL
+        'http://localhost:3000', // Optional: Local development
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, // Allow credentials if needed (e.g., cookies)
+}));
+
 app.use(bodyParser.json());
 app.use(express.json());
 
