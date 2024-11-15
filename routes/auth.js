@@ -63,7 +63,6 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         console.log(`Password match result: ${isMatch}`);
         if (!isMatch) {
-            console.log(`Password mismatch for email: ${email}`);
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
@@ -83,7 +82,6 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
-
 
 
 
