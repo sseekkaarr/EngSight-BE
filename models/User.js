@@ -20,8 +20,8 @@ const User = sequelize.define('User', {
 
 // Hook untuk hash password sebelum menyimpan
 User.beforeCreate(async (user) => {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // user.password = await bcrypt.hash(user.password, salt);
 
     // Set default name jika tidak diisi
     if (!user.name || user.name.trim() === '') {

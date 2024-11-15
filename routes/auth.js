@@ -27,11 +27,11 @@ router.post('/register', async (req, res) => {
         }
 
         // Enkripsi password
-        // const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         // console.log(`Password hashed during registration: ${hashedPassword}`); // Tambahkan log
 
         // Buat pengguna baru
-        const user = await User.create({ email, password, name });
+        const user = await User.create({ email, password: hashedPassword, name });
         return res.status(201).json({ message: 'User registered successfully.', user });
     } catch (error) {
         console.error('Error during registration:', error);
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
         console.log(`Found user: ${user.email}, Hashed Password in DB: ${user.password}`);
 
         // Periksa password
-        const isMatch = password === user.password;
+        const isMatch = bcrypt.compare(password, user.password);
         console.log(`Password match result: ${isMatch}`);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials.' });
