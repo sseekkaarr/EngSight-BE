@@ -57,6 +57,9 @@ router.post('/login', async (req, res) => {
 
         console.log(`Found user: ${user.email}, Hashed Password: ${user.password}`);
 
+        let checkPassword = await bcrypt.hash(password, 10);
+        console.log(`Input password ${checkPassword}`);
+
         // Periksa password
         const isMatch = await bcrypt.compare(password, user.password);
         console.log(`Password match result: ${isMatch}`);
